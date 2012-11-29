@@ -1,0 +1,62 @@
+
+html, body {
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+#controls {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 100px;
+    background-color: grey;
+    border-right: 3px solid white;
+}
+
+#colors {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 200px;
+    background-color: grey;
+    border-left: 3px solid white;
+}
+
+#workspace {
+    background: black;
+    position: absolute;
+    top: 0;
+    left: 103px;
+    right: 103px;
+    bottom: 0;
+}
+
+#matrix {
+    margin: 15px;
+    border: 2px solid #333333;
+    display: inline-block;
+    -webkit-user-select: none;
+    cursor: crosshair;
+}
+.matrix-row {
+    display: block;
+    line-height: 22px;
+    -webkit-user-select: none;
+}
+.matrix-cell {
+    margin: 2px;
+    border: 1px solid #333333;
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    -webkit-border-radius: 10px;
+    line-height: 20px;
+    vertical-align: middle;
+    -webkit-user-select: none;
+}
+
+
