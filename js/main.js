@@ -215,30 +215,44 @@ ColorPickerView.prototype.addColorPickListener = function (cb) {
     this.colorPickListeners.push(cb);
 };
 
+var tools = {
+    freehand: {
+        click: function (frame, x, y, toolState) {
+            frame.setPixel(x, y, toolState.currentColor);
+        }
+    }
+};
+
 function init() {
 
     var pixelFormat = new IndexedPixelFormat([[0, 0, 0], [255, 0, 0]]);
     var frameSet = new FrameSet(8, 5, pixelFormat, 4);
-    var overlay = new Overlay(frameSet, null);
 
     var frameSetView = new FrameSetView(document.getElementById("workspace"));
     var colorPickerView = new ColorPickerView(document.getElementById("colors"));
-    var currentColor = pixelFormat.getDefaultPixelData();
+    var currentTool = tools.freehand;
+    var toolState = {
+        currentColor: pixelFormat.getDefaultPixelData(),
+        overlay: new Overlay(frameSet, null)
+    };
 
     frameSetView.cellClickEvent.addListener(function (frameIndex, x, y) {
         var frame = frameSet.frames[frameIndex];
-        frame.setPixel(x, y, currentColor);
+        currentTool.click(frame, x, y, toolState);
     });
 
-    colorPickerView.update(pixelFormat, currentColor);
+    colorPickerView.update(pixelFormat, toolState.currentColor);
     colorPickerView.colorPickEvent.addListener(function (selectedColor) {
-        currentColor = selectedColor;
-        colorPickerView.update(pixelFormat, currentColor);
+        toolState.currentColor = selectedColor;
+        colorPickerView.update(pixelFormat, toolState.currentColor);
     });
 
-    frameSetView.update(frameSet, overlay);
+    frameSetView.update(frameSet, toolState.overlay);
     frameSet.dataUpdateEvent.addListener(function () {
-        frameSetView.update(frameSet, overlay);
+        frameSetView.update(frameSet, toolState.overlay);
+    });
+    toolState.overlay.dataUpdateEvent.addListener(function () {
+        frameSetView.update(frameSet, toolState.overlay);
     });
 }
 
