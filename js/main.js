@@ -108,4 +108,51 @@ function init() {
     });
 }
 
+function frameSetToJSONableDict(frameSet) {
+    var ret = {};
+    ret.pixelFormat = {};
+    if (frameSet.pixelFormat instanceof IndexedPixelFormat) {
+        ret.pixelFormat.type = "indexed";
+        ret.pixelFormat.palette = frameSet.pixelFormat.palette;
+    }
+    else {
+        ret.pixelFormat.type = "unsupported";
+        console.log("Unsupported Pixel Format ", frameSet.pixelFormat);
+    }
+
+    ret.frames = [];
+    for (var i = 0; i < frameSet.frames.length; i++) {
+        ret.frames.push({
+            data: frameSet.frames[i].data
+        });
+    }
+
+    return ret;
+}
+
+function frameSetFromJSONableDict(dict) {
+    var pixelFormat = null;
+    var pixelFormatType = dict.pixelFormat.type;
+    if (pixelFormatType == "indexed") {
+        pixelFormat = new IndexedPixelFormat(dict.pixelFormat.palette);
+    }
+    else {
+        console.log("Unsupported Pixel Format");
+        return null;
+    }
+
+    var frameCount = dict.frames.length;
+    var rowCount = dict.frames[0].data[0].length;
+    var colCount = dict.frames[0].data[0][0].length;
+
+    var frameSet = new FrameSet(rowCount, colCount, pixelFormat, frameCount);
+
+    // Now copy in the pixel data, since frameSet is currently all blank.
+    for (var i = 0; i < frameCount; i++) {
+        frameSet.frames[i].data = dict.frames[i].data;
+    }
+
+    return frameSet;
+}
+
 $("#matrix").ready(init);
