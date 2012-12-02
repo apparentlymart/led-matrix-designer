@@ -6,9 +6,31 @@ html, body {
     border: 0;
 }
 
-#controls {
+.button {
+    border: 2px solid transparent;
+}
+.button:hover {
+    border: 2px outset #aaaaaa;
+}
+.button:active {
+    border: 2px inset #aaaaaa;
+}
+
+#docactions {
     position: absolute;
     top: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background-color: grey;
+    border-bottom: 3px solid white;
+    cursor: default;
+    -webkit-user-select: none;
+}
+
+#controls {
+    position: absolute;
+    top: 43px;
     left: 0;
     bottom: 0;
     width: 100px;
@@ -20,7 +42,7 @@ html, body {
 
 #colors {
     position: absolute;
-    top: 0;
+    top: 43px;
     right: 0;
     bottom: 0;
     width: 200px;
@@ -33,7 +55,7 @@ html, body {
 #workspace {
     background: black;
     position: absolute;
-    top: 0;
+    top: 43px;
     left: 103px;
     right: 103px;
     bottom: 0;
@@ -80,3 +102,33 @@ html, body {
     outline-offset: -5px;
 }
 
+#docactions .docaction {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    margin-top: 3px;
+    margin-left: 3px;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.docaction-new {
+    background-image: url(../img/document_stroke_24x24.png);
+}
+.docaction-open {
+    background-image: url(../img/folder_stroke_24x24.png);
+}
+.docaction-save {
+    /* FIXME: Don't have an icon for this guy yet. */
+}
+.docaction-export {
+    background-image: url(../img/download_18x24.png);
+}
+.docaction-undo {
+    background-image: url(../img/undo_24x24.png);
+}
+.docaction-redo {
+    background-image: url(../img/redo_24x24.png);
+}
+.docaction-properties {
+    background-image: url(../img/wrench_24x24.png);
+}

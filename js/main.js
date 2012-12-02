@@ -6,6 +6,7 @@ function init() {
 
     var frameSetView = new FrameSetView(document.getElementById("workspace"));
     var colorPickerView = new ColorPickerView(document.getElementById("colors"));
+    var docActionsView = new DocActionsView(document.getElementById("docactions"));
     var currentTool = tools.freehand;
     var toolState = {
         currentColor: pixelFormat.getDefaultPixelData(),
@@ -92,6 +93,11 @@ function init() {
         toolState.overlay.frameIndex = null;
         frameSetView.update(frameSet, toolState.overlay);
     });
+
+    docActionsView.actionClickEvent.addListener(function (actionKey) {
+        docActions[actionKey].click(frameSet, toolState);
+    });
+    docActionsView.update(docActions, docActionsOrder);
 
     colorPickerView.update(pixelFormat, toolState.currentColor);
     colorPickerView.colorPickEvent.addListener(function (selectedColor) {

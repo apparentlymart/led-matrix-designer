@@ -190,3 +190,34 @@ ColorPickerView.prototype.addColorPickListener = function (cb) {
     this.colorPickListeners.push(cb);
 };
 
+
+// Provides the "docActions" bar, which most people would call a "toolbar"
+// but that name is used to refer to the UI for choosing drawing tools.
+function DocActionsView(containerElem) {
+    this.containerElem = containerElem;
+    this.actionClickEvent = new Listenable();
+}
+DocActionsView.prototype = {};
+DocActionsView.prototype.update = function (docActions, order) {
+    var container = d3.select(this.containerElem);
+
+    var thisDocActionsView = this;
+    var notifyClickListeners = function (selectedTool) {
+        thisDocActionsView.actionClickEvent.notifyListeners(
+            thisDocActionsView,
+            [selectedTool]
+        );
+    };
+
+    var update = container.selectAll(".docaction").data(order);
+    var enter = update.enter().append("div");
+    update.attr("class", function (d) {
+        return "docaction button docaction-" + d;
+    });
+    update.attr("title", function (d) {
+        return docActions[d].caption;
+    });
+    update.on('click', function (d, i) {
+        notifyClickListeners(d);
+    });
+};
