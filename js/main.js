@@ -1,7 +1,7 @@
 
 function init() {
 
-    var pixelFormat = new IndexedPixelFormat([[0, 0, 0], [255, 0, 0]]);
+    var pixelFormat = new IndexedPixelFormat([[0, 0, 0], [255, 0, 0], [0, 255, 0]]);
     var frameSet = new FrameSet(8, 5, pixelFormat, 4);
 
     var frameSetView = new FrameSetView(document.getElementById("workspace"));
