@@ -138,9 +138,54 @@ FrameSetView.prototype.update = function (frameSet) {
     colsUpdate.exit().remove();
 
     update.exit().remove();
-};
+}
 FrameSetView.prototype.addCellClickListener = function (cb) {
     this.cellClickListeners.push(cb);
+};
+
+function ColorPickerView(containerElem) {
+    this.containerElem = containerElem;
+    this.colorPickListeners = [];
+    this.lastPixelFormat = null;
+};
+ColorPickerView.prototype = {};
+ColorPickerView.prototype.update = function (pixelFormat, currentColor) {
+    var container = d3.select(this.containerElem);
+
+    var thisColorPickerView = this;
+    var notifyColorPickListeners = function (selectedColor) {
+        var listeners = thisColorPickerView.colorPickListeners;
+        for (var i = 0; i < listeners.length; i++) {
+            listeners[i].call(thisColorPickerView, selectedColor);
+        }
+    };
+
+    if (pixelFormat !== this.lastPixelFormat) {
+        // If we've changed to a new pixelFormat object then we might
+        // have changed our color model altogether and so we should
+        // just tear down the whole UI and start from scratch in case
+        // the new format requires a completely different sort of UI.
+        container.text('');
+    }
+
+    if (pixelFormat instanceof IndexedPixelFormat) {
+        var update = container.selectAll(".color-well").data(pixelFormat.palette);
+        var enter = update.enter().append("div");
+        enter.attr('class', 'color-well');
+        enter.on('click', function (d, i) {
+            notifyColorPickListeners(i);
+        });
+
+        update.style('background-color', function (d) {
+            return 'rgb(' + d.join(',') + ')';
+        });
+        update.classed('current', function (d, i) {
+             return (i == currentColor ? true : false);
+        });
+    }
+};
+ColorPickerView.prototype.addColorPickListener = function (cb) {
+    this.colorPickListeners.push(cb);
 };
 
 function init() {
@@ -149,16 +194,25 @@ function init() {
     var frameSet = new FrameSet(8, 5, pixelFormat, 4);
 
     var frameSetView = new FrameSetView(document.getElementById("workspace"));
+    var colorPickerView = new ColorPickerView(document.getElementById("colors"));
+    var currentColor = pixelFormat.getDefaultPixelData();
 
     frameSetView.addCellClickListener(function (frameIndex, x, y) {
         var frame = frameSet.frames[frameIndex];
-        frame.setPixel(x, y, 1);
+        frame.setPixel(x, y, currentColor);
     });
-    frameSetView.update(frameSet);
 
+    colorPickerView.update(pixelFormat, currentColor);
+    colorPickerView.addColorPickListener(function (selectedColor) {
+        currentColor = selectedColor;
+        colorPickerView.update(pixelFormat, currentColor);
+    });
+
+    frameSetView.update(frameSet);
     frameSet.addDataUpdateListener(function () {
         frameSetView.update(frameSet);
     });
+
 
 }
 

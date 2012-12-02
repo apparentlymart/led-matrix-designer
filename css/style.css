@@ -14,6 +14,8 @@ html, body {
     width: 100px;
     background-color: grey;
     border-right: 3px solid white;
+    cursor: default;
+    -webkit-user-select: none;
 }
 
 #colors {
@@ -24,6 +26,8 @@ html, body {
     width: 200px;
     background-color: grey;
     border-left: 3px solid white;
+    cursor: default;
+    -webkit-user-select: none;
 }
 
 #workspace {
@@ -35,19 +39,19 @@ html, body {
     bottom: 0;
 }
 
-.frame {
+#workspace .frame {
     margin: 15px;
     border: 2px solid #333333;
     display: inline-block;
     -webkit-user-select: none;
     cursor: crosshair;
 }
-.matrix-row {
+#workspace .matrix-row {
     display: block;
     line-height: 22px;
     -webkit-user-select: none;
 }
-.matrix-cell {
+#workspace .matrix-cell {
     margin: 2px;
     border: 1px solid #333333;
     width: 20px;
@@ -59,4 +63,20 @@ html, body {
     -webkit-user-select: none;
 }
 
+#colors .color-well {
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    border: 2px inset #aaaaaa;
+    margin: 5px;
+    cursor: default;
+    -webkit-user-select: none;
+}
+#colors .color-well.current {
+    box-shadow: 0 0 8px rgba(255, 255, 255, 1);
+    -webkit-box-shadow: 0 0 8px rgba(255, 255, 255, 1);
+    -moz-box-shadow: 0 0 8px rgba(255, 255, 255, 1);
+    outline: 1px dashed rgba(255, 255, 255, 0.5);
+    outline-offset: -5px;
+}
 
