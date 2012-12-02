@@ -1,35 +1,44 @@
 
+function Listenable() {
+    this.listeners = [];
+}
+Listenable.prototype = {};
+Listenable.prototype.addListener = function (cb) {
+    this.listeners.push(cb);
+}
+Listenable.prototype.notifyListeners = function (emitter, args) {
+    if (args == null) args = [];
+    for (var i = 0; i < this.listeners.length; i++) {
+        this.listeners[i].apply(emitter, args);
+    }
+}
+
 function FrameSet(numRows, numCols, pixelFormat, numFrames) {
     this.numRows = numRows;
     this.numCols = numCols;
     this.pixelFormat = pixelFormat;
-    this.dataUpdateListeners = [];
+    this.dataUpdateEvent = new Listenable();
 
     if (numFrames == null) numFrames = 1;
 
     var thisFrameSet = this;
     var notifyDataUpdateListeners = function () {
-        for (i = 0; i < this.dataUpdateListeners.length; i++) {
-            thisFrameSet.dataUpdateListeners[i].call(thisFrameSet);
-        }
+        thisFrameSet.dataUpdateEvent.notifyListeners(thisFrameSet);
     };
 
     this.frames = [];
     for (var i = 0; i < numFrames; i++) {
         var frame = new Frame(this);
-        frame.addDataUpdateListener(notifyDataUpdateListeners);
+        frame.dataUpdateEvent.addListener(notifyDataUpdateListeners);
         this.frames.push(frame);
     }
 }
 FrameSet.prototype = {};
-FrameSet.prototype.addDataUpdateListener = function (cb) {
-    this.dataUpdateListeners.push(cb);
-};
 
 function Frame(set) {
     this.set = set;
     this.data = [];
-    this.dataUpdateListeners = [];
+    this.dataUpdateEvent = new Listenable();
     for (var y = 0; y < set.numRows; y++) {
         var row = [];
         for (var x = 0; x < set.numCols; x++) {
@@ -46,15 +55,11 @@ Frame.prototype.setPixels = function (coords, pixelData) {
     for (var i = 0; i < coords.length; i++) {
         this.data[coords[1]][coords[0]] = pixelData;
     }
-    for (i = 0; i < this.dataUpdateListeners.length; i++) {
-        this.dataUpdateListeners[i].call(this);
-    }
+    this.dataUpdateEvent.notifyListeners(this);
 };
 Frame.prototype.getPixel = function (x, y) {
     return this.data[y][x];
 };
-Frame.prototype.addDataUpdateListener = function (cb) {
-    this.dataUpdateListeners.push(cb);
 };
 
 function IndexedPixelFormat(palette) {
@@ -78,7 +83,7 @@ RGBPixelFormat.prototype.getDefaultPixelData = function () {
 
 function FrameSetView(containerElem) {
     this.containerElem = containerElem;
-    this.cellClickListeners = [];
+    this.cellClickEvent = new Listenable();
 }
 FrameSetView.prototype = {};
 FrameSetView.prototype.update = function (frameSet) {
@@ -118,15 +123,10 @@ FrameSetView.prototype.update = function (frameSet) {
     var colsEnter = colsUpdate.enter().append("div");
     colsEnter.attr("class", "matrix-cell");
     colsEnter.on("click", function (d) {
-        var clickListeners = thisFrameSetView.cellClickListeners;
-        for (var i = 0; i < clickListeners.length; i++) {
-            clickListeners[i].call(
-                thisFrameSetView,
-                d.frameIndex,
-                d.cellIndex,
-                d.rowIndex
-            );
-        }
+        thisFrameSetView.cellClickEvent.notifyListeners(
+            thisFrameSetView,
+            [d.frameIndex, d.cellIndex, d.rowIndex]
+        );
     });
     colsUpdate.style("background-color", function (d) {
         // Input is a pixel in storage format. We must use the frameset's
@@ -145,7 +145,7 @@ FrameSetView.prototype.addCellClickListener = function (cb) {
 
 function ColorPickerView(containerElem) {
     this.containerElem = containerElem;
-    this.colorPickListeners = [];
+    this.colorPickEvent = new Listenable();
     this.lastPixelFormat = null;
 };
 ColorPickerView.prototype = {};
@@ -154,10 +154,10 @@ ColorPickerView.prototype.update = function (pixelFormat, currentColor) {
 
     var thisColorPickerView = this;
     var notifyColorPickListeners = function (selectedColor) {
-        var listeners = thisColorPickerView.colorPickListeners;
-        for (var i = 0; i < listeners.length; i++) {
-            listeners[i].call(thisColorPickerView, selectedColor);
-        }
+        thisColorPickerView.colorPickEvent.notifyListeners(
+            thisColorPickerView,
+            [selectedColor]
+        );
     };
 
     if (pixelFormat !== this.lastPixelFormat) {
@@ -197,19 +197,19 @@ function init() {
     var colorPickerView = new ColorPickerView(document.getElementById("colors"));
     var currentColor = pixelFormat.getDefaultPixelData();
 
-    frameSetView.addCellClickListener(function (frameIndex, x, y) {
+    frameSetView.cellClickEvent.addListener(function (frameIndex, x, y) {
         var frame = frameSet.frames[frameIndex];
         frame.setPixel(x, y, currentColor);
     });
 
     colorPickerView.update(pixelFormat, currentColor);
-    colorPickerView.addColorPickListener(function (selectedColor) {
+    colorPickerView.colorPickEvent.addListener(function (selectedColor) {
         currentColor = selectedColor;
         colorPickerView.update(pixelFormat, currentColor);
     });
 
     frameSetView.update(frameSet);
-    frameSet.addDataUpdateListener(function () {
+    frameSet.dataUpdateEvent.addListener(function () {
         frameSetView.update(frameSet);
     });
 
