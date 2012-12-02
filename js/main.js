@@ -60,6 +60,26 @@ Frame.prototype.setPixels = function (coords, pixelData) {
 Frame.prototype.getPixel = function (x, y) {
     return this.data[y][x];
 };
+
+function Overlay(frameSet, frameIndex) {
+    this.set = frameSet;
+    this.frameIndex = frameIndex;
+    this.frame = new Frame(frameSet);
+    this.dataUpdateEvent = new Listenable();
+    this.clear();
+    var thisOverlay = this;
+    this.frame.dataUpdateEvent.addListener(function () {
+        thisOverlay.dataUpdateEvent.notifyListeners(thisOverlay);
+    });
+}
+Overlay.prototype = {};
+Overlay.prototype.clear = function () {
+    for (var y = 0; y < this.set.numRows; y++) {
+        for (var x = 0; x < this.set.numCols; x++) {
+            this.frame.data[y][x] = null;
+        }
+    }
+    this.dataUpdateEvent.notifyListeners(this);
 };
 
 function IndexedPixelFormat(palette) {
@@ -86,7 +106,7 @@ function FrameSetView(containerElem) {
     this.cellClickEvent = new Listenable();
 }
 FrameSetView.prototype = {};
-FrameSetView.prototype.update = function (frameSet) {
+FrameSetView.prototype.update = function (frameSet, overlay) {
     var update = d3.select(this.containerElem).selectAll(".frame").data(frameSet.frames);
 
     var enter = update.enter().append("div");
@@ -133,6 +153,13 @@ FrameSetView.prototype.update = function (frameSet) {
         // pixel format to convert to an RGB value we can actually render,
         // and then finally convert that into a CSS color value.
         var dispColor = frameSet.pixelFormat.storageToDisplay(d.pixelData);
+        if (d.frameIndex == overlay.frameIndex) {
+            // overlay can optionally override our color
+            var overlayColor = overlay.frame.data[d.rowIndex][d.cellIndex];
+            if (overlayColor != null) {
+                dispColor = frameSet.pixelFormat.storageToDisplay(overlayColor);
+            }
+        }
         return "rgb(" + dispColor.join(",") + ")";
     });
     colsUpdate.exit().remove();
@@ -192,6 +219,7 @@ function init() {
 
     var pixelFormat = new IndexedPixelFormat([[0, 0, 0], [255, 0, 0]]);
     var frameSet = new FrameSet(8, 5, pixelFormat, 4);
+    var overlay = new Overlay(frameSet, null);
 
     var frameSetView = new FrameSetView(document.getElementById("workspace"));
     var colorPickerView = new ColorPickerView(document.getElementById("colors"));
@@ -208,13 +236,10 @@ function init() {
         colorPickerView.update(pixelFormat, currentColor);
     });
 
-    frameSetView.update(frameSet);
+    frameSetView.update(frameSet, overlay);
     frameSet.dataUpdateEvent.addListener(function () {
-        frameSetView.update(frameSet);
+        frameSetView.update(frameSet, overlay);
     });
-
-
 }
-
 
 $("#matrix").ready(init);
