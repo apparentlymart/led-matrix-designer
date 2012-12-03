@@ -1,20 +1,45 @@
 
 function init() {
 
-    var pixelFormat = new IndexedPixelFormat([[0, 0, 0], [255, 0, 0], [0, 255, 0]]);
-    var frameSet = new FrameSet(8, 5, pixelFormat, 4);
+    var pixelFormat = null;
+    var frameSet = null;
 
     var frameSetView = new FrameSetView(document.getElementById("workspace"));
     var colorPickerView = new ColorPickerView(document.getElementById("colors"));
     var docActionsView = new DocActionsView(document.getElementById("docactions"));
-    var currentTool = tools.freehand;
-    var toolState = {
+    var currentTool = null;
+    var toolState = null;
+
+    var replaceFrameSet = function (newFrameSet) {
+        frameSet = newFrameSet;
+        pixelFormat = newFrameSet.pixelFormat;
+        currentTool = tools.freehand;
+        toolState = {
         currentColor: pixelFormat.getDefaultPixelData(),
-        overlay: new Overlay(frameSet, null),
-        dragStartX: null,
-        dragStartY: null,
-        dragStartFrameIndex: null
+            overlay: new Overlay(frameSet, null),
+            dragStartX: null,
+            dragStartY: null,
+            dragStartFrameIndex: null
+        };
+        colorPickerView.update(pixelFormat, toolState.currentColor);
+        frameSetView.update(frameSet, toolState.overlay);
+        docActionsView.update(docActions, docActionsOrder);
+
+        frameSet.dataUpdateEvent.addListener(function () {
+            frameSetView.update(frameSet, toolState.overlay);
+        });
+        toolState.overlay.dataUpdateEvent.addListener(function () {
+            frameSetView.update(frameSet, toolState.overlay);
+        });
+
     };
+
+    replaceFrameSet(new FrameSet(
+        8,
+        5,
+        new IndexedPixelFormat([[0, 0, 0], [255, 0, 0], [0, 255, 0], [255, 255, 0]]),
+        4
+    ));
 
     frameSetView.cellEvents.mouseDown.addListener(function (frameIndex, x, y) {
         var frame = frameSet.frames[frameIndex];
@@ -95,22 +120,17 @@ function init() {
     });
 
     docActionsView.actionClickEvent.addListener(function (actionKey) {
-        docActions[actionKey].click(frameSet, toolState);
+        var actionData = {
+            frameSet: frameSet,
+            toolState: toolState,
+            replaceFrameSet: replaceFrameSet
+        };
+        docActions[actionKey].click(actionData);
     });
-    docActionsView.update(docActions, docActionsOrder);
 
-    colorPickerView.update(pixelFormat, toolState.currentColor);
     colorPickerView.colorPickEvent.addListener(function (selectedColor) {
         toolState.currentColor = selectedColor;
         colorPickerView.update(pixelFormat, toolState.currentColor);
-    });
-
-    frameSetView.update(frameSet, toolState.overlay);
-    frameSet.dataUpdateEvent.addListener(function () {
-        frameSetView.update(frameSet, toolState.overlay);
-    });
-    toolState.overlay.dataUpdateEvent.addListener(function () {
-        frameSetView.update(frameSet, toolState.overlay);
     });
 }
 

@@ -1,0 +1,81 @@
+<html>
+<head>
+<title>New Document</title>
+<link rel="stylesheet" type="text/css" href="dialoglib.css">
+<script type="text/javascript" src="dialoglib.js"></script>
+<style type="text/css">
+
+</style>
+</head>
+<body>
+
+<div id="dialog">
+
+<form id="dialogbody" class="ui-widget ui-widget-content">
+
+
+<table class="dialog-form">
+<tr id="field-dimensions">
+<th><label>Matrix Dimensions</label></th>
+<td><input type="number" step="1" value="8" min="1" max="256" name="width"> x <input type="number" step="1" value="8" min="1" max="256" name="height"></td>
+</tr>
+<tr id="field-dimensions">
+<th><label>Color Format</label></th>
+<td>
+<dl>
+  <dt><label><input type="radio" checked name="colorformat"> Indexed Color</label></dt>
+  <dd><label><input type="number" step="1" value="2" min="2" max="256" name="palettesize"> colors<label></dd>
+</div>
+  <dt><label><input type="radio" disabled name="colorformat"> RGB Color</label></dt>
+  <dd><label><input type="number" disabled step="1" value="8" min="1" max="8"> bit(s) per channel</label></dd>
+</dl>
+</td>
+</tr>
+</table>
+
+</form>
+
+<div id="dialogactions">
+
+<button id="cancel">Cancel</button>
+<button id="confirm">New Document</button>
+
+</div>
+
+</div>
+
+<script type="text/javascript">
+
+var form = document.getElementById("dialogbody");
+
+var data = {
+    width: parseInt(form.width.value),
+    height: parseInt(form.height.value),
+    pixelFormat: {
+        type: "indexed",
+        colors: parseInt(form.palettesize.value),
+    }
+};
+
+$(form.width).bind('change', function () {
+    data.width = parseInt(form.width.value);
+});
+$(form.height).bind('change', function () {
+    data.height = parseInt(form.height.value);
+});
+$(form.palettesize).bind('change', function () {
+    data.pixelFormat.colors = parseInt(form.palettesize.value);
+});
+
+$("#dialogactions").ready(function () {
+    $("#cancel").bind('click', function () {
+        dialog.cancel();
+    });
+    $("#confirm").bind('click', function () {
+        dialog.confirm(data);
+    });
+});
+
+</script>
+</body>
+</html>

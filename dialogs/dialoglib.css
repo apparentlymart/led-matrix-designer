@@ -1,0 +1,54 @@
+
+html, body {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    font-size: 14px;
+}
+
+#dialog {
+    display: inline-block;
+    min-width: 400px;
+    min-height: 300px;
+    position: relative;
+}
+#dialogbody {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 60px;
+    padding: 0;
+    margin: 0 ! important;
+}
+#dialogactions {
+    position: absolute;
+    height: 50px;
+    border-top: 1px solid #666666;
+    padding: 5px;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: -webkit-box;
+    -webkit-box-orient: horizontal;
+    -webkit-box-pack: end;
+    -webkit-box-align: center;
+}
+
+.dialog-form th, .dialog-form td {
+    color: #ffffff;
+    padding: 4px;
+    vertical-align: top;
+    text-align: left;
+    font-size: 14px;
+}
+label {
+    white-space: nowrap;
+}
+
+input[type=number] {
+    width: 75px;
+    text-align: right;
+}

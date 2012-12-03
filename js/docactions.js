@@ -2,8 +2,25 @@
 var docActions = {
     new: {
         caption: 'New...',
-        click: function (frameSet, toolState) {
+        click: function (actionData) {
             console.log("Clicked on 'new'");
+            showDialog("newFrameSet", {}, function (data) {
+                if (data == null) return;
+
+                var palette = [
+                    [ 0, 0, 0 ],
+                    [ 255, 0, 0 ]
+                ];
+
+                for (var i = palette.length; i < data.pixelFormat.colors; i++) {
+                    palette.push([ 0, 0, 0 ]);
+                }
+
+                var pixelFormat = new IndexedPixelFormat(palette);
+                var frameSet = new FrameSet(data.height, data.width, pixelFormat, 1);
+
+                actionData.replaceFrameSet(frameSet);
+            });
         }
     },
     open: {

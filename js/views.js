@@ -18,6 +18,10 @@ function FrameSetView(containerElem) {
         mouseOver: new Listenable(),
         mouseOut: new Listenable()
     };
+    // Keep track of which frameSet we used on the last update so we can
+    // do a hard reset if this changes.
+    this.lastFrameSet = null;
+
     // Used to keep track of which frame we last saw the mouse cursor
     // inside so we can fire events when this changes. This works
     // around glitchy event dispatching when we see events from the
@@ -30,6 +34,13 @@ function FrameSetView(containerElem) {
 }
 FrameSetView.prototype = {};
 FrameSetView.prototype.update = function (frameSet, overlay) {
+    if (frameSet != this.lastFrameSet) {
+        d3.select(this.containerElem).text('');
+        this.mouseOverFrameIndex = null;
+        this.mouseDownFrameIndex = null;
+    }
+    this.lastFrameSet = frameSet;
+
     var update = d3.select(this.containerElem).selectAll(".frame").data(frameSet.frames);
 
     // Bind to a real local variable so that it'll be available in the
